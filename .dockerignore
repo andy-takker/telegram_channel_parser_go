@@ -1,0 +1,25 @@
+# VCS
+.git
+.gitignore
+
+# Build artifacts
+bin/
+dist/
+out/
+coverage.txt
+
+# IDE
+.vscode/
+.idea/
+
+# Caches
+**/__pycache__/
+**/*.pyc
+**/.DS_Store
+
+# Go
+**/*.test
+go.work
+
+.env
+.env.dev
