@@ -1,0 +1,11 @@
+services:
+  app:
+    restart: on-failure
+    build: .
+    environment:
+      APP_BOT_TOKEN: ${APP_BOT_TOKEN}
+      APP_CHAT_ID: ${APP_CHAT_ID}
+      APP_CHANNEL_USERNAME: ${APP_CHANNEL_USERNAME}
+      APP_POLL_SECONDS: ${APP_POLL_SECONDS}
+      APP_KEYWORD: ${APP_KEYWORD}
+      APP_STATE_FILE: ${APP_STATE_FILE}

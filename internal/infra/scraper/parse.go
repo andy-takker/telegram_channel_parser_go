@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
 )
 
-func ParseDocument(doc *goquery.Document, channel string) []Post {
-	var posts []Post
+func ParseDocument(doc *goquery.Document, channel domain.ChannelUsername) []domain.Post {
+	var posts []domain.Post
 	doc.Find(".tgme_widget_message_wrap").Each(func(_ int, wrap *goquery.Selection) {
 		root := wrap.Find(".tgme_widget_message")
 		if root.Length() == 0 {
@@ -26,7 +28,7 @@ func ParseDocument(doc *goquery.Document, channel string) []Post {
 		}
 		var url string
 		root.Find(".tgme_widget_message_date a").EachWithBreak(func(_ int, a *goquery.Selection) bool {
-			if href, ok := a.Attr("href"); ok && strings.Contains(href, "/"+channel+"/") {
+			if href, ok := a.Attr("href"); ok && strings.Contains(href, "/"+string(channel)+"/") {
 				url = href
 				return false
 			}
@@ -43,11 +45,11 @@ func ParseDocument(doc *goquery.Document, channel string) []Post {
 		if len(runes) > 600 {
 			text = string(runes[:600]) + "…"
 		}
-		posts = append(posts, Post{MsgID: id, URL: url, Text: text})
+		posts = append(posts, domain.Post{ID: id, URL: url, Text: text})
 	})
 	// простая сортировка вставками по возрастанию id
 	for i := 1; i < len(posts); i++ {
-		for j := i; j > 0 && posts[j-1].MsgID > posts[j].MsgID; j-- {
+		for j := i; j > 0 && posts[j-1].ID > posts[j].ID; j-- {
 			posts[j-1], posts[j] = posts[j], posts[j-1]
 		}
 	}

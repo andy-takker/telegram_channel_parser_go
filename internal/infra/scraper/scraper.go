@@ -6,13 +6,9 @@ import (
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
-)
 
-type Post struct {
-	MsgID int
-	URL   string
-	Text  string
-}
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
+)
 
 type Scraper struct {
 	Client *http.Client
@@ -22,8 +18,8 @@ func New(c *http.Client) *Scraper {
 	return &Scraper{Client: c}
 }
 
-func (s *Scraper) Fetch(ctx context.Context, channel string) ([]Post, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://t.me/s/"+channel, nil)
+func (s *Scraper) Fetch(ctx context.Context, channel domain.ChannelUsername) ([]domain.Post, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://t.me/s/"+string(channel), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
 )
 
 type Telegram struct {
 	Client         *http.Client
-	Token          string
-	ChatID         string
+	Token          domain.BotToken
+	ChatID         domain.ChatID
 	DisablePreview bool
 }
 
@@ -22,18 +24,18 @@ type sendMessageReq struct {
 	DisableWebPagePreview bool   `json:"disable_web_page_preview"`
 }
 
-func NewTelegram(c *http.Client, token, chatID string) *Telegram {
+func NewTelegram(c *http.Client, token domain.BotToken, chatID domain.ChatID) *Telegram {
 	return &Telegram{Client: c, Token: token, ChatID: chatID, DisablePreview: true}
 }
 
 func (t *Telegram) Send(ctx context.Context, text string) error {
 	body := sendMessageReq{
-		ChatID:                t.ChatID,
+		ChatID:                string(t.ChatID),
 		Text:                  text,
 		DisableWebPagePreview: t.DisablePreview,
 	}
 	j, _ := json.Marshal(body)
-	u := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", url.PathEscape(t.Token))
+	u := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", url.PathEscape(string(t.Token)))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(j))
 	if err != nil {
 		return err
@@ -48,13 +50,4 @@ func (t *Telegram) Send(ctx context.Context, text string) error {
 		return fmt.Errorf("sendMessage failed: %s", resp.Status)
 	}
 	return nil
-}
-
-func ComposeMessage(msgID int, url, text string) string {
-	var b bytes.Buffer
-	fmt.Fprintf(&b, "#%d:\n%s\n\n", msgID, url)
-	if text != "" {
-		b.WriteString(text)
-	}
-	return b.String()
 }

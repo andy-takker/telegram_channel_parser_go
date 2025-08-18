@@ -1,31 +1,23 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/andy-takker/telegram_channel_parser_go/internal/notifier"
-	"github.com/andy-takker/telegram_channel_parser_go/internal/scraper"
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
 )
 
-type State interface {
-	Get() int
-	Set(int)
-}
-
-type Notifier interface {
-	Send(ctx context.Context, text string) error
-}
-
 type App struct {
-	Scraper  *scraper.Scraper
-	Notifier Notifier
-	Channel  string
+	Scraper  domain.Scraper
+	Notifier domain.Notifier
+	Channel  domain.ChannelUsername
 	Every    time.Duration
-	State    State
+	State    domain.State
 	Keyword  string
 }
 
@@ -38,9 +30,9 @@ func (a *App) Tick(ctx context.Context) error {
 		return errors.New("no posts found")
 	}
 	last := a.State.Get()
-	var news []scraper.Post
+	var news []domain.Post
 	for _, p := range posts {
-		if p.MsgID > last {
+		if p.ID > last {
 			// === фильтрация по ключевому слову ===
 			if a.Keyword != "" {
 				if !containsKeyword(p.Text, a.Keyword) {
@@ -55,13 +47,13 @@ func (a *App) Tick(ctx context.Context) error {
 		return nil
 	}
 	for _, p := range news {
-		msg := notifier.ComposeMessage(p.MsgID, p.URL, p.Text)
+		msg := composeMessage(p.ID, p.URL, p.Text)
 		if err := a.Notifier.Send(ctx, msg); err != nil {
 			return err
 		}
 		log.Printf("→ Отправлено: %s", p.URL)
 	}
-	a.State.Set(news[len(news)-1].MsgID)
+	a.State.Set(news[len(news)-1].ID)
 	return nil
 }
 
@@ -87,4 +79,13 @@ func containsKeyword(text, keyword string) bool {
 		strings.ToLower(text),
 		strings.ToLower(keyword),
 	)
+}
+
+func composeMessage(ID int, url, text string) string {
+	var b bytes.Buffer
+	fmt.Fprintf(&b, "#%d:\n%s\n\n", ID, url)
+	if text != "" {
+		b.WriteString(text)
+	}
+	return b.String()
 }

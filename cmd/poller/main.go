@@ -7,11 +7,14 @@ import (
 
 	"github.com/andy-takker/telegram_channel_parser_go/internal/app"
 	"github.com/andy-takker/telegram_channel_parser_go/internal/config"
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
+	"github.com/andy-takker/telegram_channel_parser_go/internal/infra/notifier"
+	"github.com/andy-takker/telegram_channel_parser_go/internal/infra/scraper"
+	"github.com/andy-takker/telegram_channel_parser_go/internal/infra/state"
 	"github.com/andy-takker/telegram_channel_parser_go/internal/logx"
-	"github.com/andy-takker/telegram_channel_parser_go/internal/notifier"
-	"github.com/andy-takker/telegram_channel_parser_go/internal/scraper"
-	"github.com/andy-takker/telegram_channel_parser_go/internal/state"
 	"github.com/andy-takker/telegram_channel_parser_go/pkg/httputil"
+
+	_ "net/http/pprof"
 )
 
 func main() {
@@ -25,7 +28,7 @@ func main() {
 	s := scraper.New(client)
 	n := notifier.NewTelegram(client, cfg.BotToken, cfg.ChatID)
 
-	var st app.State
+	var st domain.State
 	if cfg.StorePath != "" {
 		fst, err := state.NewFileStore(cfg.StorePath)
 		if err != nil {

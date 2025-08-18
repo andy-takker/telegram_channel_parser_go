@@ -6,12 +6,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/andy-takker/telegram_channel_parser_go/internal/domain"
 )
 
 type Config struct {
-	BotToken        string
-	ChatID          string
-	ChannelUsername string
+	BotToken        domain.BotToken
+	ChatID          domain.ChatID
+	ChannelUsername domain.ChannelUsername
 	PollInterval    time.Duration
 	StorePath       string
 	Keyword         string
@@ -39,9 +41,9 @@ func getInt(key string, def int) int {
 
 func Load() Config {
 	return Config{
-		BotToken:        getStrict("APP_BOT_TOKEN"),
-		ChatID:          getStrict("APP_CHAT_ID"),
-		ChannelUsername: strings.TrimPrefix(getStrict("APP_CHANNEL_USERNAME"), "@"),
+		BotToken:        domain.BotToken(getStrict("APP_BOT_TOKEN")),
+		ChatID:          domain.ChatID(getStrict("APP_CHAT_ID")),
+		ChannelUsername: domain.ChannelUsername(strings.TrimPrefix(getStrict("APP_CHANNEL_USERNAME"), "@")),
 		PollInterval:    time.Duration(getInt("APP_POLL_SECONDS", 5)) * time.Second,
 		StorePath:       strings.TrimSpace(os.Getenv("APP_STATE_FILE")),
 		Keyword:         getStrict("APP_KEYWORD"),
